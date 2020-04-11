@@ -1,0 +1,2 @@
+const CARD_HEIGHT = 220.0;
+const CARD_WIDTH = 300.0;
