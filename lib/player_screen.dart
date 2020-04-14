@@ -1,6 +1,7 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:mindfulness/models.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
 enum CurrentState { player, settings }
 
@@ -27,6 +28,7 @@ class PlayerScreenState extends State<PlayerScreen> {
   void initState() {
     super.initState();
     backgroundPlayer.toggleLoop();
+    backgroundPlayer.stop();
     mainPlayer.open(Audio(item.audioAsset));
     isPlaying = true;
   }
@@ -162,25 +164,26 @@ class PlayerScreenState extends State<PlayerScreen> {
       });
       return false;
     } else {
-      mainPlayer.stop();
       return true;
     }
   }
 
-  @override
-  void dispose() {
-    mainPlayer.dispose();
-    backgroundPlayer.dispose();
-    super.dispose();
-  }
-
   getCurrentPosition() {
     return StreamBuilder(
-        stream: mainPlayer.currentPosition,
-        builder: (context, asyncSnapshot) {
-          final Duration duration = asyncSnapshot.data;
-          return Text(getDurationString(duration), style: TextStyle(color: Colors.white, fontSize: 32));
-        });
+      stream: mainPlayer.currentPosition,
+      builder: (context, asyncSnapshot) {
+        final Duration timeElapsed = asyncSnapshot.data;
+        var timeLeft = Duration(seconds: mainPlayer.current.value.audio.duration.inSeconds - timeElapsed.inSeconds);
+        return CircularPercentIndicator(
+          radius: 220.0,
+          lineWidth: 2.0,
+          percent: timeElapsed.inSeconds / mainPlayer.current.value.audio.duration.inSeconds,
+          center: Text(getDurationString(timeLeft), style: TextStyle(color: Colors.white, fontSize: 32)),
+          backgroundColor: Colors.white30,
+          progressColor: Colors.white,
+        );
+      },
+    );
   }
 
   getDurationString(Duration duration) {
